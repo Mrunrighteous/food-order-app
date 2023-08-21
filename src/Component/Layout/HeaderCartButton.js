@@ -11,6 +11,9 @@ const HeaderCartButton = (props) => {
   }, 0);
   const btnClass = `${styles.button} ${btnIsHighlighted ? styles.bump : " "}`;
   useEffect(() => {
+    if (items.length === 0) {
+      return;
+    }
     setBtnIsHighlighted(true);
     const timer = setTimeout(() => {
       setBtnIsHighlighted(false);
