@@ -1,34 +1,53 @@
+import React, { useState, useEffect } from "react";
 import Card from "../UI/Card";
 import MealItem from "./MealItems/MealItem";
 import styles from "./AvailableMeals.module.css";
-const DUMMY_MEALS = [
-  {
-    id: "m1",
-    name: "Sushi",
-    description: "Finest fish and veggies",
-    price: 22.99,
-  },
-  {
-    id: "m2",
-    name: "Schnitzel",
-    description: "A german specialty!",
-    price: 16.5,
-  },
-  {
-    id: "m3",
-    name: "Barbecue Burger",
-    description: "American, raw, meaty",
-    price: 12.99,
-  },
-  {
-    id: "m4",
-    name: "Green Bowl",
-    description: "Healthy...and green...",
-    price: 18.99,
-  },
-];
+
 const AvailableMeals = () => {
-  const mealList = DUMMY_MEALS.map((meal) => (
+  const [meal, setMeal] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [httpError, setHttpError] = useState();
+  useEffect(() => {
+    const fetchMealData = async () => {
+      const response = await fetch(
+        "https://food-ordering-app-1e8e1-default-rtdb.asia-southeast1.firebasedatabase.app/meal.json"
+      );
+      if (!response.ok) {
+        throw new Error();
+      }
+      const responseData = await response.json();
+      const loadedData = [];
+      for (const key in responseData) {
+        loadedData.push({
+          id: key,
+          name: responseData[key].name,
+          description: responseData[key].description,
+          price: responseData[key].price,
+        });
+      }
+      setMeal(loadedData);
+      setIsLoading(false);
+    };
+    fetchMealData().catch((error) => {
+      setHttpError(error.message);
+      setIsLoading(false);
+    });
+  }, []);
+  if (isLoading) {
+    return (
+      <section className={styles.mealsLoading}>
+        <p>Loading...</p>
+      </section>
+    );
+  }
+  if (httpError) {
+    return (
+      <section className={styles.mealsError}>
+        <p>{httpError}</p>
+      </section>
+    );
+  }
+  const mealList = meal.map((meal) => (
     <MealItem
       id={meal.id}
       key={meal.id}
